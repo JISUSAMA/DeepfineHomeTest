@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
+using System.Linq;
 using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Test03
@@ -12,6 +11,8 @@ namespace Test03
         [field: SerializeField]
         public LoaderModule LoaderModule { get; set; }
         [field: SerializeField] List<string> selectedAssetNames;
+
+        [Obsolete]
         private void Start()
         {
             selectedAssetNames = GetObjFiles("Models");
@@ -28,13 +29,23 @@ namespace Test03
             }
             return selectedAssetNames;
         }
+
+        [Obsolete]
         public async void Load(List<string> assetNames)
         {
+
+            List<Task<GameObject>> AddTasks = new List<Task<GameObject>>();
             foreach (string assetName in assetNames)
             {
-                GameObject loadedAsset = await LoaderModule.LoadAssetAsync(assetName);
-                loadedAsset.transform.SetParent(transform);
-            };
+                AddTasks.Add(LoaderModule.LoadAssetAsync(assetName));
+            }
+            List<Task<GameObject>> TaskList = AddTasks.ToList();
+            while (TaskList.Any())
+            {
+                Task<GameObject> finishedTask = await Task.WhenAny(TaskList);
+                TaskList.Remove(finishedTask);
+            }
+
         }
     }
 }

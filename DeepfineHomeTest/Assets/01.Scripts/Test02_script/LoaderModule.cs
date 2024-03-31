@@ -19,7 +19,7 @@ namespace Test02
         public async Task<GameObject> LoadAssetAsync(string assetName)
         {
             LoadAsset(assetName);
-            await Task.WhenAll();
+            await Task.Yield();
             if (loadAsset != null)
             {
                GameObject result = Instantiate(loadAsset, transform.position, Quaternion.identity);
